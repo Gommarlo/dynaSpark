@@ -878,7 +878,12 @@ private[deploy] class Master(
     exec.application.driver.send(
       ExecutorAdded(exec.id, worker.id, worker.hostPort, exec.cores, exec.memory))
   }
-
+  private def scaleExecutor(worker: WorkerInfo, exec: ExecutorDesc): Unit = {
+    logInfo("Scaling executor " + exec.fullId + " on worker " + worker.id)
+    worker.scaleExecutor(exec)
+    worker.endpoint.send(ScaleExecutor(exec.application.id, exec.id.toString, exec.cores.toDouble))
+    exec.application.driver.send(ExecutorScaled(System.currentTimeMillis(), exec.id.toString, exec.cores, exec.cores))
+  }
   private def registerWorker(worker: WorkerInfo): Boolean = {
     // There may be one or more refs to dead workers on this same node (w/ different ID's),
     // remove them.
