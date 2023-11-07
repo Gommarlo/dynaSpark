@@ -58,6 +58,7 @@ object GraphGenerators extends Logging {
       sc: SparkContext, numVertices: Int, numEParts: Int = 0, mu: Double = 4.0,
       sigma: Double = 1.3, seed: Long = -1): Graph[Long, Int] = {
 
+    logInfo("[GRAPH CREATION] V: %d MU: %d".format(numVertices, mu))
     val evalNumEParts = if (numEParts == 0) sc.defaultParallelism else numEParts
 
     // Enable deterministic seeding

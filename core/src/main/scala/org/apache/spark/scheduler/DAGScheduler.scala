@@ -17,7 +17,7 @@
 
 package org.apache.spark.scheduler
 
-import java.io.NotSerializableException
+import java.io.{FileInputStream, NotSerializableException}
 import java.util.Properties
 import java.util.concurrent.{ConcurrentHashMap, ExecutorService, ScheduledFuture, TimeoutException, TimeUnit}
 import java.util.concurrent.{Future => JFutrue}
@@ -51,6 +51,12 @@ import org.apache.spark.rpc.RpcTimeout
 import org.apache.spark.storage._
 import org.apache.spark.storage.BlockManagerMessages.BlockManagerHeartbeat
 import org.apache.spark.util._
+
+import spray.json._
+import DefaultJsonProtocol._
+import scala.io
+import java.nio.file.{Files, Paths}
+import org.apache.spark.deploy.control._
 
 /**
  * The high-level scheduling layer that implements stage-oriented scheduling. It computes a DAG of
@@ -168,6 +174,19 @@ private[spark] class DAGScheduler(
 
   private[scheduler] val activeJobs = new HashSet[ActiveJob]
 
+  val stageIdToWeight = new HashMap[Int, Int]
+  val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" + sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
+  val appJson = if (Files.exists(Paths.get(jsonFile))) {
+    io.Source.fromFile(jsonFile).mkString.parseJson
+  } else null
+  val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
+  val heuristic: HeuristicBase =
+  if (heuristicType == 1 && sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage"))
+    new HeuristicFixed(sc.conf)
+  else if (heuristicType == 2) new HeuristicControlUnlimited(sc.conf)
+  else new HeuristicControl(sc.conf)
+
+
   /**
    * Contains the locations that each RDD's partitions are cached on.  This map's keys are RDD ids
    * and its values are arrays indexed by partition numbers. Each array value is the set of
@@ -269,6 +288,12 @@ private[spark] class DAGScheduler(
   private[spark] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
   taskScheduler.setDAGScheduler(this)
 
+  if (appJson != null && sc.conf.getBoolean("spark.control.checkdeadline", false)) {
+    logInfo("LOADED JSON FOR APP: " + jsonFile)
+    if (!heuristic.checkDeadline(appJson)) {
+      stop()
+    }
+  }
   private val pushBasedShuffleEnabled = Utils.isPushBasedShuffleEnabled(sc.getConf, isDriver = true)
 
   private val blockManagerMasterDriverHeartbeatTimeout =
@@ -639,6 +664,15 @@ private[spark] class DAGScheduler(
     stageIdToStage(id) = stage
     updateJobIdStageIdMaps(jobId, stage)
     stage
+  }
+
+  private def setWeight(node: Stage): Unit = {
+    node.parents.foreach { parent =>
+      val w1 = stageIdToWeight.getOrElse(node.id, 0) + 1
+      val w2 = stageIdToWeight.getOrElse(parent.id, 0)
+      stageIdToWeight(parent.id) = math.max(w1, w2)
+      this.setWeight(parent)
+    }
   }
 
   /**
@@ -1344,6 +1378,10 @@ private[spark] class DAGScheduler(
       // New stage creation may throw an exception if, for example, jobs are run on a
       // HadoopRDD whose underlying HDFS files have been deleted.
       finalStage = getOrCreateShuffleMapStage(dependency, jobId)
+      stageIdToWeight.clear()
+      stageIdToWeight(finalStage.id) = 0
+      setWeight(finalStage)
+      logInfo(s"MapStageIdToWeight of JobID $jobId \n $stageIdToWeight")
     } catch {
       case e: Exception =>
         logWarning("Creating new stage failed due to exception - job: " + jobId, e)
@@ -1632,14 +1670,39 @@ private[spark] class DAGScheduler(
     if (tasks.nonEmpty) {
       logInfo(s"Submitting ${tasks.size} missing tasks from $stage (${stage.rdd}) (first 15 " +
         s"tasks are for partitions ${tasks.take(15).map(_.partitionId)})")
-      val shuffleId = stage match {
-        case s: ShuffleMapStage => Some(s.shuffleDep.shuffleId)
-        case _: ResultStage => None
-      }
+      stage.pendingPartitions ++= tasks.map(_.partitionId)
+      logDebug("New pending partitions: " + stage.pendingPartitions)
 
       taskScheduler.submitTasks(new TaskSet(
-        tasks.toArray, stage.id, stage.latestInfo.attemptNumber(), jobId, properties,
-        stage.resourceProfileId, shuffleId))
+        tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
+      stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
+      if (appJson != null) {
+        val stageJson = appJson.asJsObject.fields(stage.id.toString)
+        val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
+        val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
+        val weight = stageJson.asJsObject.fields("weight").convertTo[Long]
+        val stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
+          appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+        listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
+          weight,
+          duration,
+          totalduration,
+          stageJson.asJsObject.fields("parentsIds").convertTo[List[Int]],
+          stageJson.asJsObject.fields("nominalrate").convertTo[Double],
+          stageJson.asJsObject.fields("genstage").convertTo[Boolean],
+          stageJsonIds))
+      }
+      else {
+        logError("NO JSON FOR APP: " + jsonFile)
+        listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
+          1,
+          1,
+          1000,
+          List(),
+          0.0,
+          true,
+          List()))
+      }
     } else {
       // Because we posted SparkListenerStageSubmitted earlier, we should mark
       // the stage as completed here in case there are no tasks to run

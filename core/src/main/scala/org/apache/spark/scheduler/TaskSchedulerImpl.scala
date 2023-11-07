@@ -132,7 +132,8 @@ private[spark] class TaskSchedulerImpl(
   private[scheduler] val taskIdToTaskSetManager = new ConcurrentHashMap[Long, TaskSetManager]
   // Protected by `this`
   val taskIdToExecutorId = new HashMap[Long, String]
-
+  val execIdToTaskSet = new HashMap[String, Long].withDefaultValue(-1)
+  val taskSetToExecId = new HashMap[Long, Set[String]].withDefaultValue(Set())
   @volatile private var hasReceivedTask = false
   @volatile private var hasLaunchedTask = false
   private val starvationTimer = new Timer("task-starvation-timer", true)
@@ -982,6 +983,21 @@ private[spark] class TaskSchedulerImpl(
       }
     }
   }
+
+  def bind(executorId: String, stageId: Int): Unit = {
+    if (execIdToTaskSet(executorId) == -1) {
+      logInfo("BINDING EXECUTOR ID: %s TO STAGEID %d".format(executorId, stageId))
+      execIdToTaskSet(executorId) = stageId
+    }
+  }
+
+  def unbind(executorId: String, stageId: Int): Unit = {
+    if (execIdToTaskSet(executorId) == stageId) {
+      logInfo("UNBINDING EXECUTOR ID: %s FROM SID: %d".format(executorId, stageId))
+      execIdToTaskSet(executorId) = -1
+    }
+  }
+
 
   override def stop(exitCode: Int = 0): Unit = {
     Utils.tryLogNonFatalError {

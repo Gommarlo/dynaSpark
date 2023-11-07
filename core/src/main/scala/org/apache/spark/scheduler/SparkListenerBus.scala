@@ -89,6 +89,10 @@ private[spark] trait SparkListenerBus
         listener.onNodeUnexcluded(nodeUnexcluded)
       case blockUpdated: SparkListenerBlockUpdated =>
         listener.onBlockUpdated(blockUpdated)
+      case executorAssigned: SparkListenerExecutorAssigned =>
+        listener.onExecutorAssigned(executorAssigned)
+      case stageWeightSubmitted: SparkStageWeightSubmitted =>
+        listener.onStageWeightSubmitted(stageWeightSubmitted)
       case speculativeTaskSubmitted: SparkListenerSpeculativeTaskSubmitted =>
         listener.onSpeculativeTaskSubmitted(speculativeTaskSubmitted)
       case unschedulableTaskSetAdded: SparkListenerUnschedulableTaskSetAdded =>

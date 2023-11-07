@@ -78,6 +78,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   // `CoarseGrainedSchedulerBackend.this`.
   private val executorDataMap = new HashMap[String, ExecutorData]
 
+  private val lastExecutorScaledTimestamp = new HashMap[String, Long]
   // Number of executors for each ResourceProfile requested by the cluster
   // manager, [[ExecutorAllocationManager]]
   @GuardedBy("CoarseGrainedSchedulerBackend.this")
@@ -187,6 +188,12 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
       case ShufflePushCompletion(shuffleId, shuffleMergeId, mapIndex) =>
         scheduler.dagScheduler.shufflePushCompleted(shuffleId, shuffleMergeId, mapIndex)
 
+      case ExecutorFinishedTask(executorId, stageId) =>
+        scheduler.unbind(executorId, stageId)
+
+      case UnBind(executorId, stageId) =>
+        scheduler.unbind(executorId, stageId)
+
       case ReviveOffers =>
         makeOffers()
 
@@ -200,6 +207,28 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
             logWarning(s"Attempted to kill task $taskId for unknown executor $executorId.")
         }
 
+      case Bind(executorId, stageId) =>
+        scheduler.bind(executorId, stageId)
+        makeOffers(executorId)
+
+      case ExecutorScaled(timestamp, execId, cores, newFreeCores) =>
+        CoarseGrainedSchedulerBackend.this.synchronized {
+          if (lastExecutorScaledTimestamp.getOrElse(execId, 0L) < timestamp) {
+            executorDataMap.get(execId) match {
+              case Some(executorData) =>
+                executorDataMap(execId) = new ExecutorData(executorData.executorEndpoint,
+                  executorData.executorAddress, executorData.executorHost,
+                  newFreeCores, math.ceil(cores).toInt, executorData.logUrlMap)
+                makeOffers(execId)
+              case None =>
+                logWarning(s"Scaled not registered executorID $execId")
+            }
+            lastExecutorScaledTimestamp(execId) = timestamp
+          } else {
+            logInfo("TS ExecutorScaled arrived old")
+          }
+
+        }
       case KillExecutorsOnHost(host) =>
         scheduler.getExecutorsAliveOnHost(host).foreach { execs =>
           killExecutors(execs.toSeq, adjustTargetNumExecutors = false, countFailures = false,
@@ -366,12 +395,12 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
         logError(s"Received unexpected ask ${e}")
     }
 
-    // Make fake resource offers on all executors
+    // Make fake resource offers on all BOUND executors
     private def makeOffers(): Unit = {
       // Make sure no executor is killed while some task is launching on it
       val taskDescs = withLock {
         // Filter out executors under killing
-        val activeExecutors = executorDataMap.view.filterKeys(isExecutorActive)
+        val activeExecutors = executorDataMap.filterKeys(executorIsAlive).filterKeys(x => scheduler.execIdToTaskSet(x) != -1)
         val workOffers = activeExecutors.map {
           case (id, executorData) => buildWorkerOffer(id, executorData)
         }.toIndexedSeq
@@ -409,7 +438,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
       // Make sure no executor is killed while some task is launching on it
       val taskDescs = withLock {
         // Filter out executors under killing
-        if (isExecutorActive(executorId)) {
+        if (isExecutorActive(executorId) && scheduler.execIdToTaskSet(executorId) != -1) {
           val executorData = executorDataMap(executorId)
           val workOffers = IndexedSeq(buildWorkerOffer(executorId, executorData))
           scheduler.resourceOffers(workOffers, false)
@@ -452,7 +481,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
           logDebug(s"Launching task ${task.taskId} on executor id: ${task.executorId} hostname: " +
             s"${executorData.executorHost}.")
 
-          executorData.executorEndpoint.send(LaunchTask(new SerializableBuffer(serializedTask)))
+          executorData.executorEndpoint.send(LaunchTask(task.taskId, new SerializableBuffer(serializedTask)))
         }
       }
     }

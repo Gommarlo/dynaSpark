@@ -46,6 +46,8 @@ private[deploy] class ExecutorRunner(
     val appDesc: ApplicationDescription,
     val cores: Int,
     val memory: Int,
+    val cpuPeriod: Long,
+    val cpuQuote: Long,
     val worker: RpcEndpointRef,
     val workerId: String,
     val webUiScheme: String,
@@ -158,7 +160,7 @@ private[deploy] class ExecutorRunner(
       }
       val subsCommand = appDesc.command.copy(arguments = arguments, javaOpts = subsOpts)
       val builder = CommandUtils.buildProcessBuilder(subsCommand, new SecurityManager(conf),
-        memory, sparkHome.getAbsolutePath, substituteVariables)
+        memory, cpuPeriod, cpuQuota, sparkHome.getAbsolutePath, substituteVariables)
       val command = builder.command()
       val redactedCommand = Utils.redactCommandLineArgs(conf, command.asScala.toSeq)
         .mkString("\"", "\" \"", "\"")
