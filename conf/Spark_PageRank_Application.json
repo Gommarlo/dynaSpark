@@ -10,9 +10,9 @@
             3
         ],
         "duration": 2339276,
-        "genstage": false,
+        "genStage": false,
         "name": "count at GraphLoader.scala:94",
-        "nominalrate": 379055.5201694884,
+        "nominalRate": 379055.5201694884,
         "numtask": 1000,
         "parentsIds": [],
         "recordsread": 886715481,
@@ -21,7 +21,7 @@
         "shufflerecordswrite": 0.0,
         "inputrecord": 7000000,
         "skipped": false,
-        "totalduration": 6641627,
+        "totalDuration": 6641627,
         "weight": 5.919590292039075
     },
     "1": {
@@ -36,9 +36,9 @@
             3
         ],
         "duration": 280655,
-        "genstage": false,
+        "genStage": false,
         "name": "mapPartitions at GraphImpl.scala:207",
-        "nominalrate": 3159450.146977606,
+        "nominalRate": 3159450.146977606,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -62,9 +62,9 @@
             3
         ],
         "duration": 793790,
-        "genstage": false,
+        "genStage": false,
         "name": "mapPartitions at VertexRDD.scala:356",
-        "nominalrate": 1117065.5727585382,
+        "nominalRate": 1117065.5727585382,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -91,9 +91,9 @@
             9
         ],
         "duration": 1000045,
-        "genstage": false,
+        "genStage": false,
         "name": "mapPartitions at VertexRDDImpl.scala:245",
-        "nominalrate": 1249704.0233189508,
+        "nominalRate": 1249704.0233189508,
         "numtask": 1000,
         "parentsIds": [
             1,
@@ -123,9 +123,9 @@
             26
         ],
         "duration": 242353,
-        "genstage": false,
+        "genStage": false,
         "name": "mapPartitions at VertexRDDImpl.scala:245",
-        "nominalrate": 5156776.5201998735,
+        "nominalRate": 5156776.5201998735,
         "numtask": 1000,
         "parentsIds": [
             1,
@@ -159,9 +159,9 @@
             3
         ],
         "duration": 927998,
-        "genstage": false,
+        "genStage": false,
         "name": "mapPartitions at GraphImpl.scala:207",
-        "nominalrate": 2155.177058571247,
+        "nominalRate": 2155.177058571247,
         "numtask": 1000,
         "parentsIds": [
             3,
@@ -196,9 +196,9 @@
             26
         ],
         "duration": 440644,
-        "genstage": false,
+        "genStage": false,
         "name": "mapPartitions at VertexRDDImpl.scala:245",
-        "nominalrate": 3797482.7842884506,
+        "nominalRate": 3797482.7842884506,
         "numtask": 1000,
         "parentsIds": [
             1,
@@ -237,9 +237,9 @@
             3
         ],
         "duration": 550091,
-        "genstage": false,
+        "genStage": false,
         "name": "foreachPartition at PageRank.scala:155",
-        "nominalrate": 5453.643124501219,
+        "nominalRate": 5453.643124501219,
         "numtask": 1000,
         "parentsIds": [
             6,
@@ -265,8 +265,8 @@
             3
         ],
         "duration": 0,
-        "genstage": false,
-        "nominalrate": 0.0,
+        "genStage": false,
+        "nominalRate": 0.0,
         "parentsIds": [
             0
         ],
@@ -285,8 +285,8 @@
             3
         ],
         "duration": 0,
-        "genstage": false,
-        "nominalrate": 0.0,
+        "genStage": false,
+        "nominalRate": 0.0,
         "parentsIds": [
             0
         ],
@@ -308,8 +308,8 @@
             9
         ],
         "duration": 0,
-        "genstage": false,
-        "nominalrate": 0.0,
+        "genStage": false,
+        "nominalRate": 0.0,
         "parentsIds": [
             2,
             1
@@ -333,8 +333,8 @@
             9
         ],
         "duration": 0,
-        "genstage": false,
-        "nominalrate": 0.0,
+        "genStage": false,
+        "nominalRate": 0.0,
         "parentsIds": [
             2,
             1
@@ -362,8 +362,8 @@
             3
         ],
         "duration": 0,
-        "genstage": false,
-        "nominalrate": 0.0,
+        "genStage": false,
+        "nominalRate": 0.0,
         "parentsIds": [
             3,
             4
@@ -393,9 +393,9 @@
             9
         ],
         "duration": 66775,
-        "genstage": false,
+        "genStage": false,
         "name": "saveAsTextFile at pagerankApp.scala:72",
-        "nominalrate": 31154250.850925323,
+        "nominalRate": 31154250.850925323,
         "numtask": 1000,
         "parentsIds": [
             5,

@@ -2,13 +2,13 @@
    "0":{
       "weight":1,
       "parentsIds":[],
-      "nominalrate":0.0,
-      "genstage":true
+      "nominalRate":0.0,
+      "genStage":true
    },
    "1":{
       "weight":0,
       "parentsIds":[],
-      "nominalrate":3872366.7905824035,
-      "genstage":false
+      "nominalRate":3872366.7905824035,
+      "genStage":false
    }
 }

@@ -26,9 +26,9 @@
             3
         ],
         "duration": 5185,
-        "genstage": false,
+        "genStage": false,
         "name": "first at GeneralizedLinearAlgorithm.scala:204",
-        "nominalrate": 38572.80617164899,
+        "nominalRate": 38572.80617164899,
         "numtask": 1,
         "parentsIds": [],
         "recordsread": 200000,
@@ -37,7 +37,7 @@
         "shufflerecordsread": 0.0,
         "shufflerecordswrite": 0.0,
         "skipped": false,
-        "totalduration": 6696591,
+        "totalDuration": 6696591,
         "weight": 652.2657666345226
     },
     "1": {
@@ -67,9 +67,9 @@
             3
         ],
         "duration": 1975324,
-        "genstage": false,
+        "genStage": false,
         "name": "count at DataValidators.scala:40",
-        "nominalrate": 101.24921278737058,
+        "nominalRate": 101.24921278737058,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -108,9 +108,9 @@
             3
         ],
         "duration": 10613,
-        "genstage": false,
+        "genStage": false,
         "name": "count at GradientDescent.scala:209",
-        "nominalrate": 18844.812965231322,
+        "nominalRate": 18844.812965231322,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -161,9 +161,9 @@
             3
         ],
         "duration": 40440,
-        "genstage": false,
+        "genStage": false,
         "name": "treeAggregate at GradientDescent.scala:239",
-        "nominalrate": 4945.598417408507,
+        "nominalRate": 4945.598417408507,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -188,9 +188,9 @@
         },
         "cachedRDDs": [],
         "duration": 4006,
-        "genstage": false,
+        "genStage": false,
         "name": "treeAggregate at GradientDescent.scala:239",
-        "nominalrate": 249.6255616575137,
+        "nominalRate": 249.6255616575137,
         "numtask": 31,
         "parentsIds": [
             3
@@ -229,9 +229,9 @@
             3
         ],
         "duration": 468236,
-        "genstage": false,
+        "genStage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 427.1350344697973,
+        "nominalRate": 427.1350344697973,
         "numtask": 1000,
         "parentsIds": [
             0
@@ -264,9 +264,9 @@
         },
         "cachedRDDs": [],
         "duration": 2105772,
-        "genstage": false,
+        "genStage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 94977.04404845349,
+        "nominalRate": 94977.04404845349,
         "numtask": 1000,
         "parentsIds": [],
         "recordsread": 200000000,
@@ -293,9 +293,9 @@
         },
         "cachedRDDs": [],
         "duration": 1104732,
-        "genstage": false,
+        "genStage": false,
         "name": "map at SVMApp.java:99",
-        "nominalrate": 343971.96514629794,
+        "nominalRate": 343971.96514629794,
         "numtask": 1000,
         "parentsIds": [
             5,
@@ -325,9 +325,9 @@
         },
         "cachedRDDs": [],
         "duration": 173635,
-        "genstage": false,
+        "genStage": false,
         "name": "sortByKey at BinaryClassificationMetrics.scala:153",
-        "nominalrate": 115202.36703429608,
+        "nominalRate": 115202.36703429608,
         "numtask": 1000,
         "parentsIds": [
             7
@@ -365,9 +365,9 @@
         "cachedRDDs": [
             3
         ],
-        "genstage": false,
+        "genStage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [
             0
@@ -399,9 +399,9 @@
             }
         },
         "cachedRDDs": [],
-        "genstage": false,
+        "genStage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [],
         "recordsread": 0.0,
@@ -427,9 +427,9 @@
             }
         },
         "cachedRDDs": [],
-        "genstage": false,
+        "genStage": false,
         "name": "map at SVMApp.java:99",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [
             5,
@@ -451,9 +451,9 @@
         },
         "cachedRDDs": [],
         "duration": 256613,
-        "genstage": false,
+        "genStage": false,
         "name": "combineByKey at BinaryClassificationMetrics.scala:149",
-        "nominalrate": 77950.7000814456,
+        "nominalRate": 77950.7000814456,
         "numtask": 1000,
         "parentsIds": [
             7
@@ -482,9 +482,9 @@
         },
         "cachedRDDs": [],
         "duration": 245086,
-        "genstage": false,
+        "genStage": false,
         "name": "collect at BinaryClassificationMetrics.scala:190",
-        "nominalrate": 81616.91406281876,
+        "nominalRate": 81616.91406281876,
         "numtask": 1000,
         "parentsIds": [
             12
@@ -522,9 +522,9 @@
         "cachedRDDs": [
             3
         ],
-        "genstage": false,
+        "genStage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [
             0
@@ -556,9 +556,9 @@
             }
         },
         "cachedRDDs": [],
-        "genstage": false,
+        "genStage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [],
         "recordsread": 0.0,
@@ -584,9 +584,9 @@
             }
         },
         "cachedRDDs": [],
-        "genstage": false,
+        "genStage": false,
         "name": "map at SVMApp.java:99",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [
             6,
@@ -607,9 +607,9 @@
             }
         },
         "cachedRDDs": [],
-        "genstage": false,
+        "genStage": false,
         "name": "combineByKey at BinaryClassificationMetrics.scala:149",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [
             7
@@ -660,9 +660,9 @@
             23
         ],
         "duration": 287222,
-        "genstage": false,
+        "genStage": false,
         "name": "collect at SlidingRDD.scala:81",
-        "nominalrate": 69643.56142635315,
+        "nominalRate": 69643.56142635315,
         "numtask": 1002,
         "parentsIds": [
             12
@@ -700,9 +700,9 @@
         "cachedRDDs": [
             3
         ],
-        "genstage": false,
+        "genStage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [
             0
@@ -734,9 +734,9 @@
             }
         },
         "cachedRDDs": [],
-        "genstage": false,
+        "genStage": false,
         "name": "subtract at SVMApp.java:79",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [],
         "recordsread": 0.0,
@@ -762,9 +762,9 @@
             }
         },
         "cachedRDDs": [],
-        "genstage": false,
+        "genStage": false,
         "name": "map at SVMApp.java:99",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [
             5,
@@ -785,9 +785,9 @@
             }
         },
         "cachedRDDs": [],
-        "genstage": false,
+        "genStage": false,
         "name": "combineByKey at BinaryClassificationMetrics.scala:149",
-        "nominalrate": 0.0,
+        "nominalRate": 0.0,
         "numtask": 0,
         "parentsIds": [
             7
@@ -838,9 +838,9 @@
             23
         ],
         "duration": 19727,
-        "genstage": false,
+        "genStage": false,
         "name": "aggregate at AreaUnderCurve.scala:45",
-        "nominalrate": 1013999.2396208242,
+        "nominalRate": 1013999.2396208242,
         "numtask": 1001,
         "parentsIds": [
             12

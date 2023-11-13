@@ -18,6 +18,7 @@
 package org.apache.spark.scheduler
 
 import java.io.{FileInputStream, NotSerializableException}
+import java.nio.file.{Files, Paths}
 import java.util.Properties
 import java.util.concurrent.{ConcurrentHashMap, ExecutorService, ScheduledFuture, TimeoutException, TimeUnit}
 import java.util.concurrent.{Future => JFutrue}
@@ -28,12 +29,16 @@ import scala.collection.Map
 import scala.collection.mutable
 import scala.collection.mutable.{HashMap, HashSet, ListBuffer}
 import scala.concurrent.duration._
+import scala.io
 import scala.util.control.NonFatal
 
 import com.google.common.util.concurrent.{Futures, SettableFuture}
+import spray.json._
+import spray.json.DefaultJsonProtocol._
 
 import org.apache.spark._
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.deploy.control._
 import org.apache.spark.errors.SparkCoreErrors
 import org.apache.spark.executor.{ExecutorMetrics, TaskMetrics}
 import org.apache.spark.internal.Logging
@@ -52,11 +57,8 @@ import org.apache.spark.storage._
 import org.apache.spark.storage.BlockManagerMessages.BlockManagerHeartbeat
 import org.apache.spark.util._
 
-import spray.json._
-import DefaultJsonProtocol._
-import scala.io
-import java.nio.file.{Files, Paths}
-import org.apache.spark.deploy.control._
+
+
 
 /**
  * The high-level scheduling layer that implements stage-oriented scheduling. It computes a DAG of
@@ -175,15 +177,17 @@ private[spark] class DAGScheduler(
   private[scheduler] val activeJobs = new HashSet[ActiveJob]
 
   val stageIdToWeight = new HashMap[Int, Int]
-  val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" + sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
+  val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" +
+    sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
   val appJson = if (Files.exists(Paths.get(jsonFile))) {
     io.Source.fromFile(jsonFile).mkString.parseJson
   } else null
   val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
   val heuristic: HeuristicBase =
-  if (heuristicType == 1 && sc.conf.contains("spark.control.stagecores") && sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage"))
+  if (heuristicType == 1 && sc.conf.contains("spark.control.stagecores") &&
+    sc.conf.contains("spark.control.stagedeadlines") && sc.conf.contains("spark.control.stage")) {
     new HeuristicFixed(sc.conf)
-  else if (heuristicType == 2) new HeuristicControlUnlimited(sc.conf)
+  } else if (heuristicType == 2) new HeuristicControlUnlimited(sc.conf)
   else new HeuristicControl(sc.conf)
 
 
@@ -1673,23 +1677,30 @@ private[spark] class DAGScheduler(
       stage.pendingPartitions ++= tasks.map(_.partitionId)
       logDebug("New pending partitions: " + stage.pendingPartitions)
 
+      val shuffleId = stage match {
+        case s: ShuffleMapStage => Some(s.shuffleDep.shuffleId)
+        case _: ResultStage => None
+      }
+
       taskScheduler.submitTasks(new TaskSet(
-        tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
+        tasks.toArray, stage.id, stage.latestInfo.attemptNumber(), jobId, properties,
+        stage.resourceProfileId, shuffleId))
       stage.latestInfo.submissionTime = Some(clock.getTimeMillis())
       if (appJson != null) {
         val stageJson = appJson.asJsObject.fields(stage.id.toString)
-        val totalduration = appJson.asJsObject.fields("0").asJsObject.fields("totalduration").convertTo[Long]
+        val totalDuration = appJson.asJsObject.fields("0").asJsObject
+          .fields("totalDuration").convertTo[Long]
         val duration = stageJson.asJsObject.fields("duration").convertTo[Long]
         val weight = stageJson.asJsObject.fields("weight").convertTo[Long]
         val stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
-          appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+          appJson.asJsObject.fields(id).asJsObject.fields("nominalRate").convertTo[Double] != 0.0)
         listenerBus.post(SparkStageWeightSubmitted(stage.latestInfo, properties,
           weight,
           duration,
-          totalduration,
+          totalDuration,
           stageJson.asJsObject.fields("parentsIds").convertTo[List[Int]],
-          stageJson.asJsObject.fields("nominalrate").convertTo[Double],
-          stageJson.asJsObject.fields("genstage").convertTo[Boolean],
+          stageJson.asJsObject.fields("nominalRate").convertTo[Double],
+          stageJson.asJsObject.fields("genStage").convertTo[Boolean],
           stageJsonIds))
       }
       else {

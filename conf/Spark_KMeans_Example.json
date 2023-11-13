@@ -31,9 +31,9 @@
       3
     ],
     "duration": 1434677,
-    "genstage": false,
+    "genStage": false,
     "name": "takeSample at KMeans.scala:386",
-    "nominalrate": 139404.2003879619,
+    "nominalRate": 139404.2003879619,
     "numtask": 1000,
     "parentsIds": [],
     "recordsread": 200000000,
@@ -42,7 +42,7 @@
     "shufflerecordsread": 0.0,
     "shufflerecordswrite": 0.0,
     "skipped": false,
-    "totalduration": 4850882,
+    "totalDuration": 4850882,
     "weight": 10.690583315965894
   },
   "1": {
@@ -81,9 +81,9 @@
       3
     ],
     "duration": 12712,
-    "genstage": false,
+    "genStage": false,
     "name": "takeSample at KMeans.scala:386",
-    "nominalrate": 15733165.512901196,
+    "nominalRate": 15733165.512901196,
     "numtask": 1000,
     "parentsIds": [
       0
@@ -140,9 +140,9 @@
       3
     ],
     "duration": 181925,
-    "genstage": false,
+    "genStage": false,
     "name": "aggregate at KMeans.scala:414",
-    "nominalrate": 2198708.2588978973,
+    "nominalRate": 2198708.2588978973,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -208,9 +208,9 @@
       3
     ],
     "duration": 43294,
-    "genstage": false,
+    "genStage": false,
     "name": "collect at KMeans.scala:446",
-    "nominalrate": 18478311.082367074,
+    "nominalRate": 18478311.082367074,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -278,9 +278,9 @@
       3
     ],
     "duration": 160131,
-    "genstage": false,
+    "genStage": false,
     "name": "aggregate at KMeans.scala:414",
-    "nominalrate": 4995909.599015806,
+    "nominalRate": 4995909.599015806,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -355,9 +355,9 @@
       3
     ],
     "duration": 40410,
-    "genstage": false,
+    "genStage": false,
     "name": "collect at KMeans.scala:446",
-    "nominalrate": 17322444.939371444,
+    "nominalRate": 17322444.939371444,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -433,9 +433,9 @@
       3
     ],
     "duration": 168552,
-    "genstage": false,
+    "genStage": false,
     "name": "aggregate at KMeans.scala:414",
-    "nominalrate": 4153021.026152167,
+    "nominalRate": 4153021.026152167,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -518,9 +518,9 @@
       3
     ],
     "duration": 40113,
-    "genstage": false,
+    "genStage": false,
     "name": "collect at KMeans.scala:446",
-    "nominalrate": 17450701.767506793,
+    "nominalRate": 17450701.767506793,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -604,9 +604,9 @@
       3
     ],
     "duration": 258365,
-    "genstage": false,
+    "genStage": false,
     "name": "aggregate at KMeans.scala:414",
-    "nominalrate": 2709345.306059257,
+    "nominalRate": 2709345.306059257,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -697,9 +697,9 @@
       21
     ],
     "duration": 40719,
-    "genstage": false,
+    "genStage": false,
     "name": "collect at KMeans.scala:446",
-    "nominalrate": 17190991.920233797,
+    "nominalRate": 17190991.920233797,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -791,9 +791,9 @@
       21
     ],
     "duration": 200724,
-    "genstage": false,
+    "genStage": false,
     "name": "aggregate at KMeans.scala:414",
-    "nominalrate": 3487375.699966123,
+    "nominalRate": 3487375.699966123,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -892,9 +892,9 @@
       25
     ],
     "duration": 40351,
-    "genstage": false,
+    "genStage": false,
     "name": "collect at KMeans.scala:446",
-    "nominalrate": 17347773.289385643,
+    "nominalRate": 17347773.289385643,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -944,9 +944,9 @@
       3
     ],
     "duration": 608324,
-    "genstage": false,
+    "genStage": false,
     "name": "flatMap at KMeans.scala:461",
-    "nominalrate": 657544.3349267825,
+    "nominalRate": 657544.3349267825,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -968,9 +968,9 @@
     },
     "cachedRDDs": [],
     "duration": 28792,
-    "genstage": false,
+    "genStage": false,
     "name": "collectAsMap at KMeans.scala:465",
-    "nominalrate": 4584.606835232009,
+    "nominalRate": 4584.606835232009,
     "numtask": 1000,
     "parentsIds": [
       12
@@ -1018,9 +1018,9 @@
       3
     ],
     "duration": 77605,
-    "genstage": false,
+    "genStage": false,
     "name": "mapPartitions at KMeans.scala:287",
-    "nominalrate": 5154307.067843567,
+    "nominalRate": 5154307.067843567,
     "numtask": 1000,
     "parentsIds": [
       0,
@@ -1042,9 +1042,9 @@
     },
     "cachedRDDs": [],
     "duration": 2765,
-    "genstage": false,
+    "genStage": false,
     "name": "collectAsMap at KMeans.scala:310",
-    "nominalrate": 3616.636528028933,
+    "nominalRate": 3616.636528028933,
     "numtask": 1000,
     "parentsIds": [
       14
@@ -1083,9 +1083,9 @@
       2
     ],
     "duration": 1452858,
-    "genstage": false,
+    "genStage": false,
     "name": "saveAsTextFile at kmeans.scala:60",
-    "nominalrate": 137659.7024623191,
+    "nominalRate": 137659.7024623191,
     "numtask": 1000,
     "parentsIds": [
       0
@@ -1120,9 +1120,9 @@
       2
     ],
     "duration": 58565,
-    "genstage": false,
+    "genStage": false,
     "name": "sum at KMeansModel.scala:87",
-    "nominalrate": 3415008.9643985317,
+    "nominalRate": 3415008.9643985317,
     "numtask": 1000,
     "parentsIds": [
       0

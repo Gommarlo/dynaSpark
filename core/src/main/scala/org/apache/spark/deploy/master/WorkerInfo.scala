@@ -121,7 +121,7 @@ private[spark] class WorkerInfo(
     }
   }
 
-  def scaleExecutor(exec: ExecutorDesc) {
+  def scaleExecutor(exec: ExecutorDesc) : Unit = {
     if (executors.contains(exec.fullId)) {
       coresUsed += exec.cores - executors(exec.fullId).cores
       memoryUsed += exec.memory - executors(exec.fullId).memory

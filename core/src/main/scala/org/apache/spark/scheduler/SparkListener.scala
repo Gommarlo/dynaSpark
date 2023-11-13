@@ -43,8 +43,10 @@ case class SparkListenerStageSubmitted(stageInfo: StageInfo, properties: Propert
   extends SparkListenerEvent
 
 @DeveloperApi
-  -
-case class SparkStageWeightSubmitted(stageInfo: StageInfo, properties: Properties = null, weight: Long, duration: Long, totalduration: Long, parentsIds: List[Int], nominalrate: Double, genstage: Boolean, stageIds: List[String]) extends SparkListenerEvent
+case class SparkStageWeightSubmitted(stageInfo: StageInfo, properties: Properties = null,
+                                     weight: Long, duration: Long, totalDuration: Long,
+                                     parentsIds: List[Int], nominalRate: Double, genStage: Boolean,
+                                     stageIds: List[String]) extends SparkListenerEvent
 
 @DeveloperApi
 case class SparkListenerStageCompleted(stageInfo: StageInfo) extends SparkListenerEvent
@@ -491,9 +493,9 @@ private[spark] trait SparkListenerInterface {
    */
   def onBlockUpdated(blockUpdated: SparkListenerBlockUpdated): Unit
 
-  def onExecutorAssigned(sparkListenerExecutorAssigned: SparkListenerExecutorAssigned) {}
+  def onExecutorAssigned(sparkListenerExecutorAssigned: SparkListenerExecutorAssigned) : Unit
 
-  def onStageWeightSubmitted(stageWeightSubmitted: SparkStageWeightSubmitted) {}
+  def onStageWeightSubmitted(stageWeightSubmitted: SparkStageWeightSubmitted) : Unit
   /**
    * Called when a speculative task is submitted
    */

@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
   */
 abstract class HeuristicBase(conf: SparkConf) extends Logging{
 
-  var NOMINAL_RATE_RECORD_S: Double = conf.getDouble("spark.control.nominalrate", 1000.0)
+  var NOMINAL_RATE_RECORD_S: Double = conf.getDouble("spark.control.nominalRate", 1000.0)
   var numMaxExecutor: Int = conf.getInt("spark.control.maxexecutor", 4)
   var numExecutor = 0
 
@@ -70,7 +70,7 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
     NOMINAL_RATE_RECORD_S = recordsRead / (duration / 1000.0)
     logInfo("DURATION STAGE ID " + stage.stageId + " : " + duration)
     logInfo("NOMINAL RECORD/S STAGE ID " + stage.stageId + " : " + NOMINAL_RATE_RECORD_S)
-    conf.set("spark.control.nominalrate", NOMINAL_RATE_RECORD_S.toString)
+    conf.set("spark.control.nominalRate", NOMINAL_RATE_RECORD_S.toString)
   }
 
   def checkDeadline(appJson: JsValue) : Boolean

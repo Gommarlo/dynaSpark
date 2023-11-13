@@ -145,9 +145,9 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
     // APP STATE PROGRESS VAR
     var currentTime = System.currentTimeMillis()
     var totalDuration = appJson.asJsObject.fields("0").asJsObject.
-      fields("totalduration").convertTo[Double]
+      fields("totalDuration").convertTo[Double]
     var stageJsonIds = appJson.asJsObject.fields.keys.toList.filter(id =>
-      appJson.asJsObject.fields(id).asJsObject.fields("nominalrate").convertTo[Double] != 0.0)
+      appJson.asJsObject.fields(id).asJsObject.fields("nominalRate").convertTo[Double] != 0.0)
 
     val inputRecordProfileApp = appJson.asJsObject.fields("0").asJsObject.
       fields("inputrecord").convertTo[Long]
@@ -167,7 +167,7 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
       val stageJson = appJson.asJsObject.fields(id).asJsObject
       logInfo("SID " + id + " " + stageJson.prettyPrint)
       // IF GENSTAGE OUTPUT IS INPUTRECORD TO GENERATE
-      if (stageJson.fields("genstage").convertTo[Boolean]) {
+      if (stageJson.fields("genStage").convertTo[Boolean]) {
         outputMap(id) = inputRecordApp / numTaskApp
         val duration = stageJson.fields("duration").convertTo[Double]
         totalDuration -= duration
@@ -208,7 +208,7 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
         }
         if (inputRecord == 0.0) inputRecord = inputRecordApp / numTaskApp
         logInfo("INPUT RECORD: " + inputRecord.toString)
-        NOMINAL_RATE_RECORD_S = stageJson.fields("nominalrate").convertTo[Double]
+        NOMINAL_RATE_RECORD_S = stageJson.fields("nominalRate").convertTo[Double]
 
         // COMPUTE DEADLINE
         val duration = stageJson.fields("duration").convertTo[Double]

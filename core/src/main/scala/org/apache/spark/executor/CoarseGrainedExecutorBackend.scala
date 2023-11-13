@@ -402,10 +402,6 @@ private[spark] class CoarseGrainedExecutorBackend(
 
 private[spark] object CoarseGrainedExecutorBackend extends Logging {
 
-  // Message used internally to start the executor when the driver successfully accepted the
-  // registration request.
-  case object RegisteredExecutor
-
   case class Arguments(
       driverUrl: String,
       executorId: String,
