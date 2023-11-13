@@ -1750,6 +1750,10 @@ package object config {
         s"The value must be in allowed range [1,048,576, ${MAX_BUFFER_SIZE_BYTES}].")
       .createWithDefault(1024 * 1024)
 
+  private[spark] val UI_RETAINED_TASKS = ConfigBuilder("spark.ui.retainedTasks")
+    .intConf
+    .createWithDefault(100000)
+
   private[spark] val DEFAULT_PLUGINS_LIST = "spark.plugins.defaultList"
 
   private[spark] val PLUGINS =

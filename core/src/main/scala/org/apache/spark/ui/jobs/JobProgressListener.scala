@@ -144,7 +144,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     if (stages.size > retainedStages) {
       val toRemove = math.max(retainedStages / 10, 1)
       stages.take(toRemove).foreach { s =>
-        stageIdToData.remove((s.stageId, s.attemptId))
+        stageIdToData.remove((s.stageId, s.attemptNumber()))
         stageIdToInfo.remove(s.stageId)
       }
       stages.trimStart(toRemove)
@@ -208,7 +208,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     // so that we can display stage descriptions for pending stages:
     for (stageInfo <- jobStart.stageInfos) {
       stageIdToInfo.getOrElseUpdate(stageInfo.stageId, stageInfo)
-      stageIdToData.getOrElseUpdate((stageInfo.stageId, stageInfo.attemptId), new StageUIData)
+      stageIdToData.getOrElseUpdate((stageInfo.stageId, stageInfo.attemptNumber()), new StageUIData)
     }
   }
 
@@ -254,7 +254,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
   override def onStageCompleted(stageCompleted: SparkListenerStageCompleted): Unit = synchronized {
     val stage = stageCompleted.stageInfo
     stageIdToInfo(stage.stageId) = stage
-    val stageData = stageIdToData.getOrElseUpdate((stage.stageId, stage.attemptId), {
+    val stageData = stageIdToData.getOrElseUpdate((stage.stageId, stage.attemptNumber()), {
       logWarning("Stage completed for unknown stage " + stage.stageId)
       new StageUIData
     })
@@ -303,7 +303,8 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     }.getOrElse(SparkUI.DEFAULT_POOL_NAME)
 
     stageIdToInfo(stage.stageId) = stage
-    val stageData = stageIdToData.getOrElseUpdate((stage.stageId, stage.attemptId), new StageUIData)
+    val stageData = stageIdToData.getOrElseUpdate((stage.stageId,
+      stage.attemptNumber()), new StageUIData)
     stageData.schedulingPool = poolName
 
     stageData.description = Option(stageSubmitted.properties).flatMap {
@@ -573,4 +574,9 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     throw new TimeoutException(
       s"Can't find $numExecutors executors before $timeout milliseconds elapsed")
   }
+
+  override def onExecutorAssigned(sparkListenerExecutorAssigned:
+                                  SparkListenerExecutorAssigned): Unit = {}
+
+  override def onStageWeightSubmitted(stageWeightSubmitted: SparkStageWeightSubmitted): Unit = {}
 }

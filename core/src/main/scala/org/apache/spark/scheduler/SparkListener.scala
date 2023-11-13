@@ -134,7 +134,8 @@ case class SparkListenerUnpersistRDD(rddId: Int) extends SparkListenerEvent
 case class SparkListenerExecutorAdded(time: Long, executorId: String, executorInfo: ExecutorInfo)
   extends SparkListenerEvent
 @DeveloperApi
-case class SparkListenerExecutorAssigned(executorId: String, stageId: Int) extends SparkListenerEvent
+case class SparkListenerExecutorAssigned(executorId: String,
+                                         stageId: Int) extends SparkListenerEvent
 
 @DeveloperApi
 case class SparkListenerExecutorRemoved(time: Long, executorId: String, reason: String)
