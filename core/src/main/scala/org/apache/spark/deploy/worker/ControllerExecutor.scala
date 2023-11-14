@@ -22,7 +22,7 @@ import java.util.{Timer, TimerTask}
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.Logging
 
-/**
+/*
   * Created by Matteo on 21/07/2016.
   */
 class ControllerExecutor
@@ -83,7 +83,8 @@ class ControllerExecutor
     }
     else {
       val csi = csiOld + K * (Ts.toDouble / Ti) * (SP - (completedTasks / tasks))
-      cs = math.min(math.max(coreMin.toDouble, csp + csi), math.min((tasks-completedTasks), coreMax.toDouble))
+      cs = math.min(math.max(coreMin.toDouble, csp + csi),
+        math.min((tasks-completedTasks), coreMax.toDouble))
     }
     cs = math.ceil(cs / CQ) * CQ
     csiOld = cs - csp

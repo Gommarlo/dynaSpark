@@ -17,8 +17,6 @@
 
 package org.apache.spark.deploy.worker
 
-import sys.process._
-
 import java.io.{File, IOException}
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, UUID}
@@ -30,6 +28,8 @@ import scala.collection.mutable.{HashMap, HashSet, LinkedHashMap}
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Random, Success}
 import scala.util.control.NonFatal
+
+import sys.process._
 
 import org.apache.spark.{SecurityManager, SparkConf}
 import org.apache.spark.deploy.{Command, ExecutorDescription, ExecutorState}
@@ -48,7 +48,6 @@ import org.apache.spark.resource.ResourceUtils._
 import org.apache.spark.rpc._
 import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages._
 import org.apache.spark.util.{RpcUtils, SignalUtils, SparkUncaughtExceptionHandler, ThreadUtils, Utils}
-
 private[deploy] class Worker(
     override val rpcEnv: RpcEnv,
     webUiPort: Int,
@@ -632,7 +631,7 @@ private[deploy] class Worker(
             cores_,
             memory_,
             CPU_PERIOD,
-            cpuQuota
+            cpuQuota,
             self,
             workerId,
             webUi.scheme,
@@ -732,8 +731,10 @@ private[deploy] class Worker(
     case InitControllerExecutor(executorId, stageId, coreMin, coreMax, tasks, deadline, core) =>
       execIdToProxy(executorId).proxyEndpoint.send(Bind(executorId, stageId.toInt))
       execIdToStageId(executorId) = stageId.toInt
-      val controllerExecutor = new ControllerExecutor(conf, executorId, deadline, coreMin, coreMax, tasks, core)
-      logInfo("Created ControllerExecutor: %s , %d , %d , %d , %f".format(executorId, stageId, deadline, tasks, core))
+      val controllerExecutor = new ControllerExecutor(conf,
+        executorId, deadline, coreMin, coreMax, tasks, core)
+      logInfo("Created ControllerExecutor: %s , %d , %d , %d , %f".format(executorId,
+        stageId, deadline, tasks, core))
 
       executorIdToController(executorId) = controllerExecutor
       controllerExecutor.worker = this
@@ -759,13 +760,15 @@ private[deploy] class Worker(
     }
     try {
       val cpuquota = math.ceil(coresWanted * CPU_PERIOD).toInt.toString
-      val commandUpdateDocker = Seq("docker", "update", "--cpu-period=" + CPU_PERIOD.toString, "--cpu-quota=" + cpuquota, appId + "." + execId)
+      val commandUpdateDocker = Seq("docker", "update", "--cpu-period=" +
+        CPU_PERIOD.toString, "--cpu-quota=" + cpuquota, appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
       commandUpdateDocker.run
 
       var coreFree = math.round(coresWanted).toInt
       if (coreFree == 0) coreFree = 1
-      execIdToProxy(execId.toString).proxyEndpoint.send(ExecutorScaled(System.currentTimeMillis(), execId, coresWanted, coreFree))
+      execIdToProxy(execId.toString).proxyEndpoint.send(ExecutorScaled
+      (System.currentTimeMillis(), execId, coresWanted, coreFree))
       logInfo("Scaled executorId %s  of appId %s to  %f Core".format(execId, appId, coresWanted))
       sendToMaster (ExecutorStateChanged(appId, execId.toInt, ExecutorState.RUNNING, None, None))
     } catch {
@@ -777,7 +780,8 @@ private[deploy] class Worker(
           executors -= appId + "/" + execId
           coresAllocated -= appId + "/" + execId
         }
-        sendToMaster(ExecutorStateChanged(appId, execId.toInt, ExecutorState.FAILED, Some(e.toString), None))
+        sendToMaster(ExecutorStateChanged(appId,
+          execId.toInt, ExecutorState.FAILED, Some(e.toString), None))
     }
   }
 

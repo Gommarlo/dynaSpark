@@ -59,17 +59,21 @@ object CommandUtils extends Logging {
     builder
   }
 
-  private def buildCommandSeq(command: Command, memory: Int, cpuPeriod: Long, cpuQuota: Long, sparkHome: String): Seq[String] = {
+  private def buildCommandSeq(command: Command, memory: Int,
+                              cpuPeriod: Long, cpuQuota: Long, sparkHome: String): Seq[String] = {
     // SPARK-698: do not call the run.cmd script, as process.destroy()
     // fails to kill a process tree on Windows
     val cmd = new WorkerCommandBuilder(sparkHome, memory, command).buildCommand()
     val app_id = command.arguments(command.arguments.indexOf("--app-id") + 1)
     val executor_id = command.arguments(command.arguments.indexOf("--executor-id") + 1)
-    val docker_cmd = Seq("docker", "run", "-P", "--net=host", "-v", "/tmp:/tmp", "-v", "/usr/local/spark/conf:/usr/local/spark/conf")
-    val docker_resource = Seq("-m", s"${memory + 10240}m", s"--cpu-period=${cpuPeriod}", s"--cpu-quota=${cpuQuota}")
+    val docker_cmd = Seq("docker", "run", "-P", "--net=host",
+      "-v", "/tmp:/tmp", "-v", "/usr/local/spark/conf:/usr/local/spark/conf")
+    val docker_resource = Seq("-m", s"${memory + 10240}m",
+      s"--cpu-period=${cpuPeriod}", s"--cpu-quota=${cpuQuota}")
     val docker_name = Seq("--name=" + app_id + "." + executor_id)
     val docker_image_name = Seq("elfolink/spark:2.0")
-    (docker_cmd ++ docker_resource ++ docker_name ++ docker_image_name ++ cmd.asScala ++ Seq(command.mainClass) ++ command.arguments).toSeq
+    (docker_cmd ++ docker_resource ++ docker_name ++ docker_image_name ++
+      cmd.asScala ++ Seq(command.mainClass) ++ command.arguments).toSeq
     (cmd.asScala ++ Seq(command.mainClass) ++ command.arguments).toSeq
   }
 

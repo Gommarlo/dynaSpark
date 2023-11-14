@@ -98,7 +98,8 @@ object GraphLoader extends Logging {
     logInfo(s"It took ${TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTimeNs)} ms" +
       " to load the edges")
 
-    val graph = GraphImpl.fromEdgePartitions(edges, defaultVertexAttr = 1, edgeStorageLevel = edgeStorageLevel,
+    val graph = GraphImpl.fromEdgePartitions(edges, defaultVertexAttr = 1,
+      edgeStorageLevel = edgeStorageLevel,
       vertexStorageLevel = vertexStorageLevel)
 
     val totalV = graph.vertices.count()

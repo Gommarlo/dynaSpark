@@ -191,7 +191,8 @@ private[deploy] class DriverRunner(
       Seq(s"-D${DRIVER_RESOURCES_FILE.key}=${f.getAbsolutePath}")).getOrElse(Seq.empty)
     // TODO: If we add ability to submit multiple jars they should also be added here
     val builder = CommandUtils.buildProcessBuilder(driverDesc.command.copy(javaOpts = javaOpts),
-      securityManager, 100000, 50000, driverDesc.mem, sparkHome.getAbsolutePath, substituteVariables)
+      securityManager, 100000, 50000,
+      driverDesc.mem, sparkHome.getAbsolutePath, substituteVariables)
 
     // add WebUI driver log url to environment
     val reverseProxy = conf.get(UI_REVERSE_PROXY)

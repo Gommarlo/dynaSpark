@@ -52,7 +52,9 @@ object RoutingTablePartition {
       map.changeValue(e.srcId, 0x1, (b: Byte) => (b | 0x1).toByte)
       map.changeValue(e.dstId, 0x2, (b: Byte) => (b | 0x2).toByte)
     }
-    System.out.println("[GRAPH CREATION] "+map.size)
+    // scalastyle:off println
+    System.out.println("[GRAPH CREATION] " + map.size)
+    // scalastyle:on println
     map.iterator.map { vidAndPosition =>
       val vid = vidAndPosition._1
       val position = vidAndPosition._2

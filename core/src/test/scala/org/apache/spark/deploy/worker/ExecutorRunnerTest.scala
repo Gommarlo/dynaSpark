@@ -31,10 +31,14 @@ class ExecutorRunnerTest extends SparkFunSuite {
     val appDesc = new ApplicationDescription("app name", Some(8),
       Command("foo", Seq(appId), Map(), Seq(), Seq(), Seq()), "appUiUrl",
       DeployTestUtils.defaultResourceProfile)
-    val er = new ExecutorRunner(appId, 1, appDesc, 8, 500, "100000", "100000", null, "blah", "worker321", 123, "publicAddr", new File(sparkHome), new File("ooga"), "blah", conf, Seq("localDir"),
+    val er = new ExecutorRunner(appId, 1, appDesc, 8, 500,
+      100000, 100000, null, "blah", "http://",
+      "worker321", 123, "publicAddr", new File(sparkHome),
+      new File("ooga"), "blah", conf, Seq("localDir"),
       ExecutorState.RUNNING, ResourceProfile.DEFAULT_RESOURCE_PROFILE_ID)
     val builder = CommandUtils.buildProcessBuilder(
-      appDesc.command, new SecurityManager(conf), 1234, "100000", "100000",sparkHome, er.substituteVariables)
+      appDesc.command, new SecurityManager(conf), 1234,
+      100000, 100000, sparkHome, er.substituteVariables)
     val builderCommand = builder.command()
     assert(builderCommand.get(builderCommand.size() - 1) === appId)
   }
