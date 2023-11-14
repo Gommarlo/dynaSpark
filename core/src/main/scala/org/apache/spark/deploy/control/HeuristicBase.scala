@@ -1,13 +1,35 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package org.apache.spark.deploy.control
+
+import scala.collection.mutable.{IndexedSeq, ListBuffer}
+
+import spray.json.JsValue
 
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.Logging
 import org.apache.spark.scheduler.StageInfo
-import spray.json.JsValue
 
-import scala.collection.mutable.ListBuffer
 
-/**
+
+
+/*
   * Created by Simone Ripamonti on 13/05/2017.
   */
 abstract class HeuristicBase(conf: SparkConf) extends Logging{
@@ -22,7 +44,8 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
                    stageId : Int,
                    last: Boolean) : (Double, Double, Double)
 
-  def computeCoreForExecutors(coresToBeAllocated: Double, stageId: Int, last: Boolean): IndexedSeq[Double]
+  def computeCoreForExecutors(coresToBeAllocated: Double,
+                              stageId: Int, last: Boolean): IndexedSeq[Double]
 
   def computeTaskForExecutors(coresToBeAllocated: Double,
                               totalTasksStage: Int,
@@ -37,7 +60,8 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
       z -= 1
       taskPerExecutor += a
     }
-    val taskForExecutor = scala.collection.mutable.IndexedSeq(taskPerExecutor: _*)
+
+    val taskForExecutor = scala.collection.mutable.IndexedSeq(taskPerExecutor.toList: _*)
     var j = taskForExecutor.size - 1
     while (remainingTasks > 0 && j >= 0) {
       taskForExecutor(j) += 1
@@ -63,7 +87,8 @@ abstract class HeuristicBase(conf: SparkConf) extends Logging{
                                       firstStage: Boolean = false
                                       ): Long
 
-  def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L, stageId : Int, firstStage : Boolean = false, lastStage: Boolean = false): Double
+  def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L, stageId : Int,
+                       firstStage : Boolean = false, lastStage: Boolean = false): Double
 
   def computeNominalRecord(stage: StageInfo, duration: Long, recordsRead: Double): Unit = {
     // val duration = (stage.completionTime.get - stage.submissionTime.get) / 1000.0
