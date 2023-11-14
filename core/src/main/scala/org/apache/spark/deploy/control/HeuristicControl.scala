@@ -1,14 +1,34 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package org.apache.spark.deploy.control
+
+import scala.collection.mutable
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.IndexedSeq
+
+import spray.json._
+import spray.json.DefaultJsonProtocol._
 
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.Logging
-import spray.json._
-import DefaultJsonProtocol._
 
-
-import scala.collection.mutable.{HashMap}
-
-/**
+/*
   * Created by Simone Ripamonti on 13/05/2017.
   */
 class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging {
@@ -38,20 +58,22 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
     (coreMin, coreMax, coreToStart)
   }
 
-  override def computeCoreForExecutors(coresToBeAllocated: Double, stageId: Int, last: Boolean): IndexedSeq[Double] = {
+  override def computeCoreForExecutors(coresToBeAllocated: Double,
+                                       stageId: Int, last: Boolean): mutable.IndexedSeq[Double] = {
     numExecutor = math.ceil(coresToBeAllocated.toDouble / coreForVM.toDouble).toInt
     if (numExecutor > numMaxExecutor) {
       logError("NUM EXECUTORS TOO HIGH: %d > NUM MAX EXECUTORS %d".format(
         numExecutor, numMaxExecutor
       ))
-      IndexedSeq(-1)
+      mutable.IndexedSeq(-1)
     } else {
       var coresToStart = 0
       coresToStart = math.ceil(coresToBeAllocated.toDouble / OVERSCALE).toInt
       numExecutor = numMaxExecutor
-      (1 to numMaxExecutor).map { x =>
+      val immutable = (1 to numMaxExecutor).map { x =>
         math.ceil((coresToStart / numExecutor.toDouble) / CQ) * CQ
       }
+      mutable.IndexedSeq(immutable: _*)
     }
   }
 
@@ -76,21 +98,23 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
                                     stageId : Int,
                                     firstStage : Boolean = false): Long = {
 
-    val weight = computeWeightStage(stageId, totalStageRemaining, totalDurationRemaining, stageDuration)
-    computeDeadlineStageWeightGiven(startTime, appDeadlineJobMilliseconds, weight, stageId, firstStage)
+    val weight = computeWeightStage(stageId, totalStageRemaining,
+      totalDurationRemaining, stageDuration)
+    computeDeadlineStageWeightGiven(startTime, appDeadlineJobMilliseconds,
+      weight, stageId, firstStage)
   }
 
-
-
-  override def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L, stageId: Int = 0, firstStage : Boolean = false, lastStage: Boolean = false): Double = {
+  override def computeCoreStage(deadlineStage: Long = 0L, numRecord: Long = 0L,
+                                stageId: Int = 0, firstStage : Boolean = false,
+                                lastStage: Boolean = false): Double = {
     logInfo("NumRecords: " + numRecord.toString +
       " DeadlineStage : " + deadlineStage.toString +
       " NominalRate: " + NOMINAL_RATE_RECORD_S.toString)
 
-    if (firstStage){
+    if (firstStage) {
       // old computeCoreFirstStage
       coreForVM * numMaxExecutor
-    } else if (!lastStage){
+    } else if (!lastStage) {
       // old computeCoreStage
       if (deadlineStage > 1) {
         OVERSCALE * math.ceil((numRecord / (deadlineStage / 1000.0)) / NOMINAL_RATE_RECORD_S).toInt
@@ -108,23 +132,28 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
     }
   }
 
-
-  private def computeWeightStage(stageId: Int, totalStageRemaining: Long, totalDurationRemaining: Long, stageDuration : Long): Double = synchronized {
-
+  private def computeWeightStage(stageId: Int, totalStageRemaining: Long,
+                                 totalDurationRemaining: Long,
+                                 stageDuration : Long): Double = synchronized {
     val w1: Double = totalStageRemaining
     val w2: Double = (totalDurationRemaining.toDouble / stageDuration) - 1.0
     val weight = (w1 * BETA) + (w2 * (1.0 - BETA))
 
-    logInfo("STAGE ID " + stageId + " [WEIGHT] W1: " + w1 + " W2: " + w2 + " W: " + weight + " with BETA: " + BETA)
+    logInfo("STAGE ID " + stageId + " [WEIGHT] W1: " + w1 +
+      " W2: " + w2 + " W: " + weight + " with BETA: " + BETA)
 
     return weight;
 
   }
 
-  override def computeDeadlineStageWeightGiven(startTime: Long, appDeadlineJobMilliseconds: Long, weight: Double, stageId: Int, firstStage: Boolean): Long = {
+  override def computeDeadlineStageWeightGiven(startTime: Long,
+                                               appDeadlineJobMilliseconds: Long, weight: Double,
+                                               stageId: Int, firstStage: Boolean): Long = {
+
     var stageDeadline = ((appDeadlineJobMilliseconds - startTime) / (weight + 1)).toLong
+
     if (stageDeadline < 0) {
-      if(firstStage){
+      if (firstStage) {
         logError("DEADLINE NEGATIVE -> DEADLINE NOT SATISFIED")
       } else {
         logError("ALPHA DEADLINE NEGATIVE -> ALPHA DEADLINE NOT SATISFIED")
@@ -185,13 +214,16 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
         val beta = recordsWriteProfile.toDouble / recordsReadProfile.toDouble
         logInfo("BETA " + beta.toString)
         var inputRecordProfile = parentsIds.foldLeft(0L) {
-          (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordswrite").convertTo[Long] +
-            appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordswrite").convertTo[Long]
+          (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.
+            fields("recordswrite").convertTo[Long] + appJson.
+            asJsObject.fields(x.toString).asJsObject.fields("shufflerecordswrite").convertTo[Long]
         }
         if (inputRecordProfile == 0L) {
           inputRecordProfile = parentsIds.foldLeft(0L) {
-            (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.fields("recordsread").convertTo[Long] +
-              appJson.asJsObject.fields(x.toString).asJsObject.fields("shufflerecordsread").convertTo[Long]
+            (agg, x) => agg + appJson.asJsObject.fields(x.toString).asJsObject.
+              fields("recordsread").convertTo[Long] +
+              appJson.asJsObject.fields(x.toString).asJsObject.
+              fields("shufflerecordsread").convertTo[Long]
           }
         }
         if (inputRecordProfile == 0) inputRecordProfile = inputRecordProfileApp
