@@ -155,6 +155,47 @@ class PythonDataSourceSuite extends QueryTest with SharedSparkSession {
       parameters = Map("provider" -> dataSourceName))
   }
 
+  test("load data source") {
+    assume(shouldTestPythonUDFs)
+    val dataSourceScript =
+      s"""
+         |from pyspark.sql.datasource import DataSource, DataSourceReader
+         |import json
+         |
+         |class SimpleDataSourceReader(DataSourceReader):
+         |    def __init__(self, options):
+         |        self.options = options
+         |
+         |    def partitions(self):
+         |        if "paths" in self.options:
+         |            paths = json.loads(self.options["paths"])
+         |        elif "path" in self.options:
+         |            paths = [self.options["path"]]
+         |        else:
+         |            paths = []
+         |        return paths
+         |
+         |    def read(self, path):
+         |        yield (path, 1)
+         |
+         |class $dataSourceName(DataSource):
+         |    @classmethod
+         |    def name(cls) -> str:
+         |        return "test"
+         |
+         |    def schema(self) -> str:
+         |        return "id STRING, value INT"
+         |
+         |    def reader(self, schema):
+         |        return SimpleDataSourceReader(self.options)
+         |""".stripMargin
+    val dataSource = createUserDefinedPythonDataSource(dataSourceName, dataSourceScript)
+    spark.dataSource.registerPython("test", dataSource)
+    checkAnswer(spark.read.format("test").load(), Seq(Row(null, 1)))
+    checkAnswer(spark.read.format("test").load("1"), Seq(Row("1", 1)))
+    checkAnswer(spark.read.format("test").load("1", "2"), Seq(Row("1", 1), Row("2", 1)))
+  }
+
   test("reader not implemented") {
     assume(shouldTestPythonUDFs)
     val dataSourceScript =
