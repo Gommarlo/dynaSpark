@@ -44,6 +44,7 @@ import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat => NewFileInputFor
 import org.apache.spark.annotation.{DeveloperApi, Experimental}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.deploy.{LocalSparkCluster, SparkHadoopUtil}
+import org.apache.spark.deploy.control.ControlEventListener
 import org.apache.spark.errors.SparkCoreErrors
 import org.apache.spark.executor.{Executor, ExecutorMetrics, ExecutorMetricsSource}
 import org.apache.spark.input.{FixedLengthBinaryInputFormat, PortableDataStream, StreamInputFormat, WholeTextFileInputFormat}
@@ -211,6 +212,7 @@ class SparkContext(config: SparkConf) extends Logging {
   private var _eventLogCodec: Option[String] = None
   private var _listenerBus: LiveListenerBus = _
   private var _env: SparkEnv = _
+  private var _controlStageEventListener: ControlEventListener = _
   private var _statusTracker: SparkStatusTracker = _
   private var _progressBar: Option[ConsoleProgressBar] = None
   private var _ui: Option[SparkUI] = None
@@ -310,6 +312,8 @@ class SparkContext(config: SparkConf) extends Logging {
     map.asScala
   }
   def statusTracker: SparkStatusTracker = _statusTracker
+
+  private[spark] def controlStageEventListener: ControlEventListener = _controlStageEventListener
 
   private[spark] def progressBar: Option[ConsoleProgressBar] = _progressBar
 
@@ -481,6 +485,10 @@ class SparkContext(config: SparkConf) extends Logging {
     val appStatusSource = AppStatusSource.createSource(conf)
     _statusStore = AppStatusStore.createLiveStore(conf, appStatusSource)
     listenerBus.addToStatusQueue(_statusStore.listener.get)
+
+
+    _controlStageEventListener = new ControlEventListener(_conf)
+    listenerBus.addToStatusQueue(controlStageEventListener)
 
     // Create the Spark execution environment (cache, map output tracker, etc)
     _env = createSparkEnv(_conf, isLocal, listenerBus)
