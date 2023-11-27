@@ -19,13 +19,12 @@ package org.apache.spark.ui.jobs
 
 import java.util.concurrent.TimeoutException
 
-import scala.collection.mutable.{HashMap, HashSet, LinkedHashMap, ListBuffer}
+import scala.collection.mutable.{HashMap, HashSet, ListBuffer}
 
 import org.apache.spark._
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.executor.TaskMetrics
 import org.apache.spark.internal.Logging
-import org.apache.spark.internal.config._
 import org.apache.spark.scheduler._
 import org.apache.spark.scheduler.SchedulingMode.SchedulingMode
 import org.apache.spark.storage.BlockManagerId
@@ -94,7 +93,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
 
   val retainedStages = conf.getInt("spark.ui.retainedStages", SparkUI.DEFAULT_RETAINED_STAGES)
   val retainedJobs = conf.getInt("spark.ui.retainedJobs", SparkUI.DEFAULT_RETAINED_JOBS)
-  val retainedTasks = conf.get(UI_RETAINED_TASKS)
+  val retainedTasks = conf.getInt("spark.ui.retainedTasks", SparkUI.DEFAULT_RETAINED_TASKS)
 
   // We can test for memory leaks by ensuring that collections that track non-active jobs and
   // stages do not grow without bound and that collections for active jobs/stages eventually become
@@ -147,7 +146,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
         stageIdToData.remove((s.stageId, s.attemptNumber()))
         stageIdToInfo.remove(s.stageId)
       }
-      stages.trimStart(toRemove)
+      stages.dropInPlace(toRemove)
     }
   }
 
@@ -170,7 +169,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
           }
         }
       }
-      jobs.trimStart(toRemove)
+      jobs.dropInPlace(toRemove)
     }
   }
 
@@ -346,7 +345,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     }
   }
 
-  override def onTaskGettingResult(taskGettingResult: SparkListenerTaskGettingResult) {
+  override def onTaskGettingResult(taskGettingResult: SparkListenerTaskGettingResult) : Unit = {
     // Do nothing: because we don't do a deep copy of the TaskInfo, the TaskInfo in
     // stageToTaskInfos already has the updated status.
   }
@@ -433,7 +432,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
       stageData: StageUIData,
       execId: String,
       taskMetrics: TaskMetrics,
-      oldMetrics: Option[TaskMetricsUIData]) {
+      oldMetrics: Option[TaskMetricsUIData]) : Unit = {
     val execSummary = stageData.executorSummary.getOrElseUpdate(execId, new ExecutorSummary)
 
     val shuffleWriteDelta =
@@ -499,7 +498,8 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     stageData.executorRunTime += timeDelta
   }
 
-  override def onExecutorMetricsUpdate(executorMetricsUpdate: SparkListenerExecutorMetricsUpdate) {
+  override def onExecutorMetricsUpdate(executorMetricsUpdate:
+                                       SparkListenerExecutorMetricsUpdate) : Unit = {
     for ((taskId, sid, sAttempt, accumUpdates) <- executorMetricsUpdate.accumUpdates) {
       val stageData = stageIdToData.getOrElseUpdate((sid, sAttempt), {
         logWarning("Metrics update for task in unknown stage " + sid)
@@ -517,7 +517,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     }
   }
 
-  override def onEnvironmentUpdate(environmentUpdate: SparkListenerEnvironmentUpdate) {
+  override def onEnvironmentUpdate(environmentUpdate: SparkListenerEnvironmentUpdate) : Unit = {
     synchronized {
       schedulingMode = environmentUpdate
         .environmentDetails("Spark Properties").toMap
@@ -526,7 +526,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     }
   }
 
-  override def onBlockManagerAdded(blockManagerAdded: SparkListenerBlockManagerAdded) {
+  override def onBlockManagerAdded(blockManagerAdded: SparkListenerBlockManagerAdded) : Unit = {
     synchronized {
       val blockManagerId = blockManagerAdded.blockManagerId
       val executorId = blockManagerId.executorId
@@ -534,18 +534,19 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     }
   }
 
-  override def onBlockManagerRemoved(blockManagerRemoved: SparkListenerBlockManagerRemoved) {
+  override def onBlockManagerRemoved(blockManagerRemoved:
+                                     SparkListenerBlockManagerRemoved) : Unit = {
     synchronized {
       val executorId = blockManagerRemoved.blockManagerId.executorId
       executorIdToBlockManagerId.remove(executorId)
     }
   }
 
-  override def onApplicationStart(appStarted: SparkListenerApplicationStart) {
+  override def onApplicationStart(appStarted: SparkListenerApplicationStart) : Unit = {
     startTime = appStarted.time
   }
 
-  override def onApplicationEnd(appEnded: SparkListenerApplicationEnd) {
+  override def onApplicationEnd(appEnded: SparkListenerApplicationEnd) : Unit = {
     endTime = appEnded.time
   }
 

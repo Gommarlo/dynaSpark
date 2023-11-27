@@ -604,4 +604,9 @@ abstract class SparkListener extends SparkListenerInterface {
   override def onOtherEvent(event: SparkListenerEvent): Unit = { }
 
   override def onResourceProfileAdded(event: SparkListenerResourceProfileAdded): Unit = { }
+
+  override def onExecutorAssigned(sparkListenerExecutorAssigned:
+                                  SparkListenerExecutorAssigned): Unit = { }
+
+  override def onStageWeightSubmitted(stageWeightSubmitted: SparkStageWeightSubmitted): Unit = { }
 }

@@ -196,6 +196,16 @@ public class SparkFirehoseListener implements SparkListenerInterface {
   }
 
   @Override
+  public void onExecutorAssigned(SparkListenerExecutorAssigned sparkListenerExecutorAssigned) {
+    onEvent(sparkListenerExecutorAssigned);
+  }
+
+  @Override
+  public void onStageWeightSubmitted(SparkStageWeightSubmitted stageWeightSubmitted) {
+    onEvent(stageWeightSubmitted);
+  }
+
+  @Override
   public void onSpeculativeTaskSubmitted(SparkListenerSpeculativeTaskSubmitted speculativeTask) {
     onEvent(speculativeTask);
   }

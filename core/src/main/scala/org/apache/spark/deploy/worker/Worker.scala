@@ -764,7 +764,7 @@ private[deploy] class Worker(
       val commandUpdateDocker = Seq("docker", "update", "--cpu-period=" +
         CPU_PERIOD.toString, "--cpu-quota=" + cpuquota, appId + "." + execId)
       logDebug(commandUpdateDocker.toString)
-      commandUpdateDocker.run
+      commandUpdateDocker.run()
 
       var coreFree = math.round(coresWanted).toInt
       if (coreFree == 0) coreFree = 1

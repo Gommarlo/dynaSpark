@@ -340,7 +340,7 @@ class CoarseGrainedExecutorBackendSuite extends SparkFunSuite
         .when(executor).createTaskRunner(any(), any())
 
       // Launch a new task shall add an entry to `taskResources` map.
-      backend.self.send(LaunchTask(new SerializableBuffer(serializedTaskDescription)))
+      backend.self.send(LaunchTask(taskId, new SerializableBuffer(serializedTaskDescription)))
       eventually(timeout(10.seconds)) {
         assert(backend.taskResources.size == 1)
         assert(runningTasks.size == 1)
@@ -457,7 +457,7 @@ class CoarseGrainedExecutorBackendSuite extends SparkFunSuite
       // Launch tasks and quickly kill them so that TaskRunner.killTask will be triggered.
       taskDescriptions.foreach { taskDescription =>
         val buffer = new SerializableBuffer(TaskDescription.encode(taskDescription))
-        backend.self.send(LaunchTask(buffer))
+        backend.self.send(LaunchTask(taskDescription.taskId, buffer))
         Thread.sleep(1)
         backend.self.send(KillTask(taskDescription.taskId, "exec1", false, "test"))
       }
@@ -548,7 +548,7 @@ class CoarseGrainedExecutorBackendSuite extends SparkFunSuite
       taskDescriptions.foreach { taskDescription =>
         val buffer = new SerializableBuffer(TaskDescription.encode(taskDescription))
         backend.self.send(KillTask(taskDescription.taskId, "exec1", false, "test"))
-        backend.self.send(LaunchTask(buffer))
+        backend.self.send(LaunchTask(taskDescription.taskId, buffer))
       }
 
       eventually(timeout(10.seconds)) {

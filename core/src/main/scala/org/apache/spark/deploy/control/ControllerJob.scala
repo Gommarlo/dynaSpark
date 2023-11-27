@@ -17,14 +17,13 @@
 
 package org.apache.spark.deploy.control
 
-import scala.collection.mutable.{HashMap, ListBuffer}
+import scala.collection.mutable.IndexedSeq
 
 import org.apache.spark.{SecurityManager, SparkConf}
 import org.apache.spark.deploy.DeployMessages.{KillExecutors, UnregisterApplication}
 import org.apache.spark.deploy.master.Master
 import org.apache.spark.internal.Logging
 import org.apache.spark.rpc.{RpcAddress, RpcEnv, ThreadSafeRpcEndpoint}
-import org.apache.spark.scheduler.StageInfo
 import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages._
 
 

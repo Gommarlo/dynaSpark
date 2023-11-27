@@ -39,7 +39,7 @@ class HeuristicControl(conf: SparkConf) extends HeuristicBase(conf) with Logging
   val coreForVM: Int = conf.getInt("spark.control.coreforvm", 8)
   val OVERSCALE: Int = conf.getInt("spark.control.overscale", 2)
   val CQ: Double = conf.getDouble("spark.control.corequantum", 0.05)
-  val BETA: Double = conf.get("spark.control.beta").toDouble
+  val BETA: Double = conf.getDouble("spark.control.beta", 0.3)
 
 
   override def computeCores(coresToBeAllocated: Double,

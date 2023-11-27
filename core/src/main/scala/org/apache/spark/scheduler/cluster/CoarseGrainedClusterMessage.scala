@@ -19,6 +19,8 @@ package org.apache.spark.scheduler.cluster
 
 import java.nio.ByteBuffer
 
+import scala.collection.mutable
+
 import org.apache.spark.TaskState.TaskState
 import org.apache.spark.resource.{ResourceInformation, ResourceProfile}
 import org.apache.spark.rpc.RpcEndpointRef
@@ -61,7 +63,7 @@ private[spark] object CoarseGrainedClusterMessages {
     extends CoarseGrainedClusterMessage
 
   // ControllerJob to Master
-  case class NeededCoreForExecutors(stageId: Long, coreForExecutors: IndexedSeq[Double],
+  case class NeededCoreForExecutors(stageId: Long, coreForExecutors: mutable.IndexedSeq[Double],
                                     driverUrl: String) extends CoarseGrainedClusterMessage
 
   // Proxy to driver

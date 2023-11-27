@@ -17,7 +17,7 @@
 
 package org.apache.spark.scheduler
 
-import java.io.{FileInputStream, NotSerializableException}
+import java.io.NotSerializableException
 import java.nio.file.{Files, Paths}
 import java.util.Properties
 import java.util.concurrent.{ConcurrentHashMap, ExecutorService, ScheduledFuture, TimeoutException, TimeUnit}
@@ -29,7 +29,6 @@ import scala.collection.Map
 import scala.collection.mutable
 import scala.collection.mutable.{HashMap, HashSet, ListBuffer}
 import scala.concurrent.duration._
-import scala.io
 import scala.util.control.NonFatal
 
 import com.google.common.util.concurrent.{Futures, SettableFuture}
@@ -181,7 +180,7 @@ private[spark] class DAGScheduler(
   val jsonFile = sys.env.getOrElse("SPARK_HOME", ".") + "/conf/" +
     sc.appName.replaceAll("[^a-zA-Z0-9.-]", "_") + ".json"
   val appJson = if (Files.exists(Paths.get(jsonFile))) {
-    io.Source.fromFile(jsonFile).mkString.parseJson
+    scala.io.Source.fromFile(jsonFile).mkString.parseJson
   } else null
   val heuristicType = sc.conf.getInt("spark.control.heuristic", 0)
   val heuristic: HeuristicBase =

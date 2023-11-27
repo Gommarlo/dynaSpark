@@ -228,6 +228,8 @@ private[spark] object SparkUI {
   val DEFAULT_POOL_NAME = "default"
   val DEFAULT_RETAINED_STAGES = 1000
   val DEFAULT_RETAINED_JOBS = 1000
+  val DEFAULT_RETAINED_TASKS = 100000
+
   def getUIPort(conf: SparkConf): Int = {
     conf.get(UI_PORT)
   }

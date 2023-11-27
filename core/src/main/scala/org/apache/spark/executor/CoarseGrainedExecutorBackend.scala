@@ -58,8 +58,6 @@ private[spark] class CoarseGrainedExecutorBackend(
     resourceProfile: ResourceProfile)
   extends IsolatedThreadSafeRpcEndpoint with ExecutorBackend with Logging {
 
-  import CoarseGrainedExecutorBackend._
-
   private implicit val formats = DefaultFormats
 
   private[spark] val stopping = new AtomicBoolean(false)

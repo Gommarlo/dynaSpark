@@ -24,7 +24,7 @@ import org.apache.spark.{SecurityManager, SparkConf, TaskState}
 import org.apache.spark.internal.Logging
 import org.apache.spark.rpc._
 import org.apache.spark.scheduler.cluster.CoarseGrainedClusterMessages.{RegisteredExecutor, _}
-import org.apache.spark.util.{ThreadUtils, Utils}
+import org.apache.spark.util.ThreadUtils
 
 /*
    Created by Matteo on 21/07/2016.
@@ -193,8 +193,8 @@ class ControllerProxy
         context.reply(true)
 
       case RetrieveSparkAppConfig(resourceProfileId) =>
-        val sparkProperties = driver.get.askSync()[Seq[(String, String)]]
-        (RetrieveSparkAppConfig(resourceProfileId))
+        val sparkProperties = driver.get
+          .askSync[Seq[(String, String)]](RetrieveSparkAppConfig(resourceProfileId))
         context.reply(sparkProperties)
     }
   }
